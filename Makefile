@@ -6,7 +6,7 @@ define DaikerRun
 	rm -f $@.qcow2
 	daiker run -e random -b $<.qcow2 -T 22-222$1 $@.qcow2 &
 	$(Wait) $(Ssh222)$1 root@localhost id
-	[ ! -f lib/$(@F).m4 ] || m4 -D m4Hostname=$(@F) -D m4Id=$1 lib/$(@F).m4 | $(Ssh222)$1 root@localhost
+	( cat lib/common.m4 && [ ! -f lib/$(@F).m4 ] || cat lib/$(@F).m4 ) | m4 -D m4Hostname=$(@F) -D m4Id=$1 | $(Ssh222)$1 root@localhost
 endef
 define TmplWorker
 var/alpine-k8s-worker$1 : var/alpine-base-k8s var/alpine-$3

@@ -1,6 +1,3 @@
-set -xeEuo pipefail
-hostname m4Hostname
-echo m4Hostname > /etc/hostname
 echo -e "192.168.222.1\talpine-k8s-control" >> /etc/hosts
 echo -e "192.168.222.2\talpine-k8s-worker1" >> /etc/hosts
 echo -e "192.168.222.3\talpine-k8s-worker2" >> /etc/hosts
@@ -10,7 +7,9 @@ sed -i "s/^#//" /etc/apk/repositories
 echo "br_netfilter" > /etc/modules-load.d/k8s.conf
 modprobe br_netfilter
 echo net.ipv4.ip_forward=1 > /etc/sysctl.d/m4Hostname.conf
-echo 1 > /proc/sys/net/ipv4/ip_forward
+sysctl net.ipv4.ip_forward=1
+echo net.bridge.bridge-nf-call-iptables=1 >> /etc/sysctl.d/m4Hostname.conf
+sysctl net.bridge.bridge-nf-call-iptables=1
 apk add cni-plugin-flannel
 apk add cni-plugins
 apk add flannel
@@ -43,9 +42,6 @@ rc-update add ntpd
 /etc/init.d/containerd start
 ##fix flannel
 #ln -s /usr/libexec/cni/flannel-amd64 /usr/libexec/cni/flannel
-#kernel stuff
-echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf
-sysctl net.bridge.bridge-nf-call-iptables=1
 #Pin your versions!  If you update and the nodes get out of sync, it implodes.
 apk add 'kubelet=~1.26'
 apk add 'kubeadm=~1.26'
